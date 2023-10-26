@@ -1,0 +1,63 @@
+﻿@page "/textreplace"
+@using System.Text.RegularExpressions;
+@using System.Text;
+
+<h5>数据栏</h5>
+<MTextarea AppendIcon="mdi-microphone"
+           Class="mx-4"
+           RowHeight="20"
+           Rows="5"
+@bind-Value="@DataString"
+           HideDetails="@true"
+           Label="请输入数据内容">
+</MTextarea>
+<h5>模版语句</h5>
+<MTextarea AppendIcon="mdi-microphone"
+           Class="mx-4"
+           RowHeight="20"
+           Rows="2"
+           HideDetails="@true"
+@bind-Value="@TemplateString"
+           Label="">
+</MTextarea>
+<h5>替换结果</h5>
+<MTextarea AppendIcon="mdi-microphone"
+           Class="mx-4"
+           RowHeight="20"
+           Rows="5"
+@bind-Value="@ResultString"
+           Readonly="@true"
+           HideDetails="@true"
+           Label="">
+</MTextarea>
+<MButton class="white--text" Color="primary" @onclick="ReplaceTextEvent">
+    <MIcon>mdi-plus</MIcon>提交
+</MButton>
+
+@code {
+    public string DataString = "";
+    public string TemplateString = "";
+    private string ResultString = "";
+    private void ReplaceTextEvent()
+    {
+        StringBuilder builder = new StringBuilder();
+        ResultString = "";
+        var items = DataString.Trim().Split("\n");
+        string pattern = @"\$\d+";
+        Regex reg = new Regex(pattern);
+        var templateItems = reg.Matches(TemplateString);
+        foreach (var item in items)
+        {
+            var replaceText = TemplateString;
+            var contentItems = item.Split('|');
+            foreach (var templateItem in templateItems)
+            {
+                string tagText = templateItem.ToString();
+                var index = int.Parse(tagText.Replace("$", ""));
+                replaceText = replaceText.Replace(tagText, contentItems[index]);
+            }
+            builder.AppendLine(replaceText);
+        }
+        ResultString = builder.ToString();
+    }
+}
