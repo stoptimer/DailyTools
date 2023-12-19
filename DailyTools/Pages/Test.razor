@@ -1,0 +1,46 @@
+﻿@page "/test"
+@using DailyTools.Tools
+@inject MarkdownService MarkdownService
+
+<h3>Scientists to Study Fish after Fukushima Water Release</h3>
+<audio controls>
+    <source src="https://longya-purchase-1252163579.cos.ap-beijing.myqcloud.com/supplierfile/CDF2A1226F32869EC26AAF406BAA8101/Scientists%20to%20Study%20Fish%20after%20Fukushima%20Water%20Release.mp3" type="audio/mpeg">
+</audio>
+<div>@((MarkupString)_htmlContent)</div>
+<div>
+    <text>
+        @path
+    </text>
+</div>
+@code {
+    string path = @"By Hai Do
+19 October 2023
+A team of international scientists collected fish samples from an area near Japan's Fukushima nuclear plant Thursday. They are examining the effects of the recent release of treated radioactive water from the plant into the sea.
+The study by the International Atomic Energy Agency (IAEA) is the first since the water release began in August. Local fishermen criticized the release. It also led China to ban all seafood products from Japan over food safety fears.
+Scientists from China, South Korea and Canada observed the collection of fish samples at Hisanohama Port, about 50 kilometers south of Fukushima.
+
+An expert from the International Atomic Energy Agency (IAEA) observes the inshore fish as the sample at Hisanohama Port, Thursday, Oct. 19, 2023, in Iwaki, northeastern Japan. (Eugene Hoshiko/Pool via REUTERS)
+The samples will be sent to laboratories in each country for independent testing, the U.N. nuclear agency said.
+Paul McGinnity is a research scientist with the IAEA overseeing the study. He said, ""The Japanese government has requested that we do this and one of the reasons they want us to do this is to try and strengthen confidence in the data that Japan is producing.""
+More than a million metric tons of water was contaminated by contact with fuel at the nuclear reactor following the 2011 earthquake and tsunami disaster.
+Before being released, the water is filtered to remove isotopes, leaving only tritium, which is difficult to separate. Plant operator Tepco said the levels of tritium in the water are weakened to below official limits.
+The IAEA says that tritium is ""a naturally occurring radioactive form of hydrogen that is produced in the atmosphere when cosmic rays collide with air molecules.""
+The agency says tritium cannot enter the body through human skin. It is only harmful if ingested in a very large amount.
+I'm Mario Ritter, Jr.
+Hai Do adapted this report for VOA Learning English from Reuters and other sources.
+______________________________________________
+Words in This Story
+sample –n. a small amount of something taken to get information about it
+plant –n. a center, building or factory
+confidence –n. a feeling of trust or belief
+contaminated –adj. containing impurities or something undesirable
+filtered –adj. something that has had an unwanted substance removed from it
+isotope –n. a version of an element that has an unusual number of neutrons";
+    private string _markdownContent = "# Hello World\nThis is a *markdown* example.";
+    private string _htmlContent;
+
+    protected override void OnInitialized()
+    {
+        _htmlContent = MarkdownService.ParseMarkdown(_markdownContent);
+    }
+}

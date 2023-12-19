@@ -1,0 +1,55 @@
+﻿@page "/markdown"
+@using DailyTools.Data
+@using DailyTools.Tools
+@inject MarkdownService MarkdownService
+<style type="text/css">
+    .nickname {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .m-list-item-avatar img {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+    }
+</style>
+<h3>MarkDown</h3>
+<div>
+    <MContainer>
+        <MList>
+            @foreach (var message in messages)
+            {
+                <MListItem>
+                    <MListItemAvatar>
+                        <img src="@message.AvatarUrl" alt="头像" />
+                    </MListItemAvatar>
+                    <MListItemContent>
+                        <div class="nickname">@message.Nickname</div>
+                        <div>@((MarkupString)ParseMessage(message.Content))</div>
+                    </MListItemContent>
+                </MListItem>
+            }
+        </MList>
+    </MContainer>
+</div>
+@code {
+    private string _markdownContent = "# Hello World\nThis is a *markdown* example.";
+    private string _htmlContent;
+    private List<GeminiMessage> messages = null;
+    protected override async Task OnInitializedAsync()
+    {
+        messages = new List<GeminiMessage>() { };
+        messages.Add(new GeminiMessage() { AvatarUrl = "", Content = "```python\nimport requests\n\n# 发送 GET 请求\nresponse = requests.get('https://www.example.com')\nprint(response.text)\n\n# 发送 POST 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = requests.post('https://www.example.com/submit', data=payload)\nprint(response.text)\n\n# 发送 PUT 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = requests.put('https://www.example.com/update', data=payload)\nprint(response.text)\n\n# 发送 DELETE 请求\nresponse = requests.delete('https://www.example.com/delete')\nprint(response.text)\n\n# 使用会话\nsession = requests.Session()\n\n# 发送 GET 请求\nresponse = session.get('https://www.example.com')\nprint(response.text)\n\n# 发送 POST 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = session.post('https://www.example.com/submit', data=payload)\nprint(response.text)\n\n# 发送 PUT 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = session.put('https://www.example.com/update', data=payload)\nprint(response.text)\n\n# 发送 DELETE 请求\nresponse = session.delete('https://www.example.com/delete')\nprint(response.text)\n```", Nickname = "xyc", Id = "" });
+    }
+    private string ParseMessage(string markdownText)
+    {
+        return MarkdownService.ParseMarkdown(markdownText);
+    }
+    private void SubmitMessage()
+    {
+
+    }
+
+}
+

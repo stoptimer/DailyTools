@@ -1,4 +1,5 @@
 ﻿using DailyTools.Data;
+using DailyTools.Tools;
 using Microsoft.Extensions.Logging;
 
 namespace DailyTools
@@ -21,7 +22,7 @@ namespace DailyTools
 		builder.Services.AddBlazorWebViewDeveloperTools();
 		builder.Logging.AddDebug();
 #endif
-
+            builder.Services.AddSingleton<MarkdownService>();
             builder.Services.AddSingleton<WeatherForecastService>();
             builder.Services.AddMasaBlazor();
             return builder.Build();
