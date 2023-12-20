@@ -1,7 +1,8 @@
-﻿using DailyTools.Data;
+﻿using Android.App;
+using DailyTools.Data;
 using DailyTools.Tools;
 using Microsoft.Extensions.Logging;
-
+[assembly: UsesPermission(Android.Manifest.Permission.Internet)]
 namespace DailyTools
 {
     public static class MauiProgram
@@ -24,6 +25,7 @@ namespace DailyTools
 #endif
             builder.Services.AddSingleton<MarkdownService>();
             builder.Services.AddSingleton<WeatherForecastService>();
+            builder.Services.AddScoped(sp => new HttpClient { });
             builder.Services.AddMasaBlazor();
             return builder.Build();
         }

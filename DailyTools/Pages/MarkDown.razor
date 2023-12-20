@@ -1,46 +1,89 @@
 ﻿@page "/markdown"
 @using DailyTools.Data
 @using DailyTools.Tools
+@using System.Net.Http
+@using Newtonsoft.Json
+@using System.Net.Http.Headers
+@using System.Text
 @inject MarkdownService MarkdownService
-<style type="text/css">
-    .nickname {
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .m-list-item-avatar img {
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-    }
-</style>
 <h3>MarkDown</h3>
-<div>
-    <MContainer>
-        <MList>
+<MContainer>
+    <div class="markmain">
+        <div class="top-area">
             @foreach (var message in messages)
             {
-                <MListItem>
-                    <MListItemAvatar>
-                        <img src="@message.AvatarUrl" alt="头像" />
-                    </MListItemAvatar>
-                    <MListItemContent>
-                        <div class="nickname">@message.Nickname</div>
-                        <div>@((MarkupString)ParseMessage(message.Content))</div>
-                    </MListItemContent>
-                </MListItem>
+                @if (message.Role == "user")
+                {
+                    <div class="sent">
+                        <MCard Class="mx-auto transition-swing rounded-4" MaxWidth="344" Elevation="12">
+                            <MListItem>
+                                <MListItemContent>
+                                    <MMarkdownIt Source="@message.Content" Class="markdown-parser__basic" OnTocParsed="OnTocParsed" />
+                                </MListItemContent>
+                            </MListItem>
+                        </MCard>
+                    </div>
+                }
+                else
+                {
+                    <div class="received">
+                        <MCard Class="mx-auto transition-swing rounded-4" MaxWidth="344" Elevation="12">
+                            <MListItem>
+                                <MListItemContent>
+                                    <MMarkdownIt Source="@message.Content" Class="markdown-parser__basic" OnTocParsed="OnTocParsed" />
+                                </MListItemContent>
+                            </MListItem>
+                        </MCard>
+                    </div>
+                }
+
             }
-        </MList>
-    </MContainer>
-</div>
-@code {
+        </div>
+        <div class="bottom-area">
+            <MRow>
+                <MCol Cols="12"
+                      Sm="6">
+                    <MTextField @bind-Value="sendMessage"
+                                        Solo
+                                 Label="write your question" Autofocus="true"
+                                 OnKeyUp="onKeyUp"
+                                        Clearable>
+                    </MTextField>
+                </MCol>
+                <MCol Cols="12"
+                      Sm="6">
+                    <MButton Color="primary" @onclick="SubmitMessage">
+                        <MIcon Left>mdi-send</MIcon>
+                        Send
+                    </MButton>
+                </MCol>
+
+
+            </MRow>
+        </div>
+    </div>
+</MContainer>
+                @code {
     private string _markdownContent = "# Hello World\nThis is a *markdown* example.";
     private string _htmlContent;
     private List<GeminiMessage> messages = null;
+    private string sendMessage = "";
     protected override async Task OnInitializedAsync()
     {
-        messages = new List<GeminiMessage>() { };
-        messages.Add(new GeminiMessage() { AvatarUrl = "", Content = "```python\nimport requests\n\n# 发送 GET 请求\nresponse = requests.get('https://www.example.com')\nprint(response.text)\n\n# 发送 POST 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = requests.post('https://www.example.com/submit', data=payload)\nprint(response.text)\n\n# 发送 PUT 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = requests.put('https://www.example.com/update', data=payload)\nprint(response.text)\n\n# 发送 DELETE 请求\nresponse = requests.delete('https://www.example.com/delete')\nprint(response.text)\n\n# 使用会话\nsession = requests.Session()\n\n# 发送 GET 请求\nresponse = session.get('https://www.example.com')\nprint(response.text)\n\n# 发送 POST 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = session.post('https://www.example.com/submit', data=payload)\nprint(response.text)\n\n# 发送 PUT 请求\npayload = {'key1': 'value1', 'key2': 'value2'}\nresponse = session.put('https://www.example.com/update', data=payload)\nprint(response.text)\n\n# 发送 DELETE 请求\nresponse = session.delete('https://www.example.com/delete')\nprint(response.text)\n```", Nickname = "xyc", Id = "" });
+        messages = new List<GeminiMessage>();
+
+    }
+    private void OnTocParsed(List<MarkdownItTocContent> tocContents)
+    {
+
+    }
+    private void onKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            // 提交输入框中的值
+            SubmitMessage();
+        }
     }
     private string ParseMessage(string markdownText)
     {
@@ -48,8 +91,96 @@
     }
     private void SubmitMessage()
     {
+        messages.Add(new GeminiMessage() { AvatarUrl = "", Content = sendMessage, Id = "", Nickname = "", Role = "user" });
+        sendMessage = "";
+        var res = GetGeminiApiData();
+
 
     }
+    private async Task<bool> GetGeminiApiData()
+    {
+        try
+        {
+            HttpClient _client = new HttpClient();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            string json = JsonConvert.SerializeObject(messages);
+            var contentString = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = _client.PostAsync("http://nas.cnzba.com:6787/gemini", contentString).GetAwaiter().GetResult();
+            var res = response.Content.ReadAsStringAsync().Result;
+            var entity = JsonConvert.DeserializeObject<GeminiproEntity>(res);
+            if (entity == null)
+            {
+                return false;
+            }
+            var contentEntity = entity.candidates[0];
+            foreach (var item in contentEntity.content.parts)
+            {
+                messages.Add(new GeminiMessage() { AvatarUrl = "", Content = item.text, Id = "", Nickname = contentEntity.content.role, Role = contentEntity.content.role });
+            }
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
 
+        return true;
+    }
 }
+
+<style>
+    .box {
+        width: 300px;
+        margin: 100px auto;
+        background-color: #f5f5f5;
+    }
+
+    .received {
+        /* 发送的消息样式 */
+       
+        text-align: left;
+        margin-left: 40%; /* 对齐到右边，留出左边的空间 */
+        margin-bottom:10px;
+    }
+
+    .sent {
+        /* 接收的消息样式 */
+        margin-bottom: 10px;
+        text-align: right;
+        margin-right: 40%; /* 对齐到左边，留出右边的空间 */
+    }
+   
+    .top-area {
+        flex: 1;
+        overflow-y: scroll;
+        margin-bottom: 60px;
+    }
+
+    .bottom-area {
+        height: 60px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .markmain {
+        height: 81vh;
+        display: flex;
+        flex-direction: column;
+        background-color: #F0F3FA;
+    }
+
+    .markcontent {
+        border: solid 1px black;
+        background-color: white;
+    }
+
+    .markdown-parser__basic img {
+        max-width: 100%;
+    }
+
+    .markdown-parser__basic blockquote {
+        border-left: 4px lightgray solid;
+        padding-left: 16px;
+    }
+</style>
 

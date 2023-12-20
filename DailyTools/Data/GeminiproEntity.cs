@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DailyTools.Data
 {
+
     public class GeminiproEntity
     {
         public Candidate[] candidates { get; set; }
@@ -47,5 +48,4 @@ namespace DailyTools.Data
         public string category { get; set; }
         public string probability { get; set; }
     }
-
 }

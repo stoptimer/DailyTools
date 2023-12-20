@@ -1,0 +1,68 @@
+﻿// Blazor页面 (.razor)
+
+@page "/chat"
+
+<h3>微信风格聊天页面</h3>
+
+<div class="chat-container">
+    @foreach (var message in messages)
+    {
+            <div class="@GetMessageClass(message)">
+            @message.Content
+            </div>
+    }
+</div>
+
+<div class="input-area">
+    <input @bind="inputMessage" placeholder="输入消息..." />
+    <button @onclick="SendMessage">发送</button>
+</div>
+
+@code {
+    private List<Message> messages = new List<Message>();
+    private string inputMessage;
+
+    private void SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(inputMessage))
+        {
+            messages.Add(new Message { Content = inputMessage, IsSent = true });
+            inputMessage = string.Empty;
+        }
+        messages.Add(new Message { Content = inputMessage, IsSent = false });
+    }
+
+    private string GetMessageClass(Message message)
+    {
+        return message.IsSent ? "message sent" : "message received";
+    }
+
+    private class Message
+    {
+        public string Content { get; set; }
+        public bool IsSent { get; set; } // true for sent, false for received
+    }
+}
+<style>
+    .message {
+        /* 基础消息样式 */
+        padding: 5px 10px;
+        margin: 5px;
+        border-radius: 10px;
+        max-width: 60%;
+    }
+
+    .sent {
+        /* 发送的消息样式 */
+        background-color: lightblue;
+        text-align: right;
+        margin-left: 40%; /* 对齐到右边，留出左边的空间 */
+    }
+
+    .received {
+        /* 接收的消息样式 */
+        background-color: lightgreen;
+        text-align: left;
+        margin-right: 40%; /* 对齐到左边，留出右边的空间 */
+    }
+</style>

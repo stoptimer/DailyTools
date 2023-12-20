@@ -12,5 +12,7 @@ namespace DailyTools.Data
         public string Nickname { get; set; }
         public string AvatarUrl { get; set; }
         public string Content { get; set; }
+        public string Role { get; set; }
     }
+    
 }

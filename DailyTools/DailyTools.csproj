@@ -62,6 +62,7 @@
         <PackageReference Include="Markdig" Version="0.34.0" />
         <PackageReference Include="Masa.Blazor" Version="1.0.4" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
     <ItemGroup>
